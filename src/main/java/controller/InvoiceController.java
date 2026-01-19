@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/invoices")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://ims-frontend-psi.vercel.app")
 public class InvoiceController {
 
     @Autowired

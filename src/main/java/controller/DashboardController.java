@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/dashboard")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://ims-frontend-psi.vercel.app")
 public class DashboardController {
 
     @Autowired

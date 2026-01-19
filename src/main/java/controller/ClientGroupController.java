@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/groups")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://ims-frontend-psi.vercel.app")
 public class ClientGroupController {
 
     @Autowired

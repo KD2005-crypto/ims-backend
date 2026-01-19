@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000") // Allow Frontend
+@CrossOrigin(origins = "https://ims-frontend-psi.vercel.app") // Allow Frontend
 public class AuthController {
 
     @Autowired
