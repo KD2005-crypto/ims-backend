@@ -1,45 +1,64 @@
 package com.codeb.ims.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "invoices")
-@Data
+@Table(name = "invoices") // Matches the table name in your PDF
 public class Invoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long invoiceId;
+    private Long id; // [cite: 192] "int(pk) and auto_increment"
 
     @Column(unique = true, nullable = false)
-    private String invoiceNumber; // e.g., "INV-2024-001"
+    private int invoiceNo; // [cite: 192] "Stores four digit unique id"
 
-    @Column(nullable = false)
-    private Double amount; // Basic Amount
+    private int estimatedId; // [cite: 192] "Stores estimated id"
+    private int chainId;     // [cite: 192] "Stores chain id"
 
-    @Column(nullable = false)
-    private Double taxAmount; // GST (18%)
+    private String serviceDetails; // [cite: 192] "Stores details related to service"
+    private int quantity;          // [cite: 192] "Stores quantity"
+    private float costPerQty;      // [cite: 192] "Stores cost per quantity"
 
-    @Column(nullable = false)
-    private Double totalAmount; // Amount + Tax
+    private float amountPayable;   // [cite: 192] "Total amount to be paid"
+    private float amountPaid;      // [cite: 192]
+    private float balance;         // [cite: 192] "Stored balance amount"
 
-    @Column(nullable = false)
-    private String customerName;
+    private LocalDateTime dateOfPayment; // [cite: 192] "datetime"
+    private LocalDate dateOfService;     // [cite: 192] "date"
 
-    @Column(nullable = false)
-    private String status; // "PAID", "PENDING", "CANCELLED"
+    private String deliveryDetails; // [cite: 192] "Address and other delivery details"
+    private String emailId;         // [cite: 192] "Stores email id"
 
-    private String pdfFilePath; // We will store the link to the generated PDF here
-
-    // Link Invoice to a specific Store Location
-    @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
-
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public int getInvoiceNo() { return invoiceNo; }
+    public void setInvoiceNo(int invoiceNo) { this.invoiceNo = invoiceNo; }
+    public int getEstimatedId() { return estimatedId; }
+    public void setEstimatedId(int estimatedId) { this.estimatedId = estimatedId; }
+    public int getChainId() { return chainId; }
+    public void setChainId(int chainId) { this.chainId = chainId; }
+    public String getServiceDetails() { return serviceDetails; }
+    public void setServiceDetails(String serviceDetails) { this.serviceDetails = serviceDetails; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public float getCostPerQty() { return costPerQty; }
+    public void setCostPerQty(float costPerQty) { this.costPerQty = costPerQty; }
+    public float getAmountPayable() { return amountPayable; }
+    public void setAmountPayable(float amountPayable) { this.amountPayable = amountPayable; }
+    public float getAmountPaid() { return amountPaid; }
+    public void setAmountPaid(float amountPaid) { this.amountPaid = amountPaid; }
+    public float getBalance() { return balance; }
+    public void setBalance(float balance) { this.balance = balance; }
+    public LocalDateTime getDateOfPayment() { return dateOfPayment; }
+    public void setDateOfPayment(LocalDateTime dateOfPayment) { this.dateOfPayment = dateOfPayment; }
+    public LocalDate getDateOfService() { return dateOfService; }
+    public void setDateOfService(LocalDate dateOfService) { this.dateOfService = dateOfService; }
+    public String getDeliveryDetails() { return deliveryDetails; }
+    public void setDeliveryDetails(String deliveryDetails) { this.deliveryDetails = deliveryDetails; }
+    public String getEmailId() { return emailId; }
+    public void setEmailId(String emailId) { this.emailId = emailId; }
 }
