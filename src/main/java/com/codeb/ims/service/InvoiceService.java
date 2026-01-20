@@ -38,8 +38,10 @@ public class InvoiceService {
         return invoiceRepository.save(invoice);
     }
 
-    // --- 2. Get All Invoices (MISSING METHOD ADDED) ---
-    public List<Invoice> getAllInvoices() {
+    // ... rest of the file ...
+
+    // ENSURE THIS METHOD EXISTS
+    public java.util.List<Invoice> getAllInvoices() {
         return invoiceRepository.findAll();
     }
 }

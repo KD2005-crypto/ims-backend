@@ -2,12 +2,14 @@ package com.codeb.ims.repository;
 
 import com.codeb.ims.entity.Invoice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
-    // Find all invoices for a specific location (Store)
-    List<Invoice> findByLocation_LocationId(Long locationId);
+    // --- DELETE ALL OLD METHODS HERE ---
+    // Methods like "findByCustomerName" or "findByStatus" MUST GO.
+    // They cause the crash because those fields no longer exist.
 
-    // Check if invoice number already exists
-    boolean existsByInvoiceNumber(String invoiceNumber);
+    // You can add valid ones later, like:
+    // Invoice findByInvoiceNo(int invoiceNo);
 }
