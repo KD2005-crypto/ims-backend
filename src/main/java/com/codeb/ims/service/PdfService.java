@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 @Service
 public class PdfService {
 
-    public ByteArrayInputStream generateInvoicePdf(Invoice invoice) {
+    // Renamed to createInvoicePdf to match your Controller's expectation
+    public ByteArrayInputStream createInvoicePdf(Invoice invoice) {
         Document document = new Document(PageSize.A4);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -23,13 +24,12 @@ public class PdfService {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // --- 1. FONTS & COLORS ---
+            // 1. Header Styling
             Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, BaseColor.DARK_GRAY);
             Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
             Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.BLACK);
             Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.BLACK);
 
-            // --- 2. HEADER SECTION ---
             Paragraph title = new Paragraph("INVOICE", titleFont);
             title.setAlignment(Element.ALIGN_RIGHT);
             document.add(title);
@@ -39,22 +39,21 @@ public class PdfService {
             document.add(new Chunk(ls));
             document.add(Chunk.NEWLINE);
 
-            // --- 3. INFO SECTION (Fixing the Error Here) ---
+            // 2. Info Section Table
             PdfPTable infoTable = new PdfPTable(2);
             infoTable.setWidthPercentage(100);
-            // Note: Removed setBorderWidth(0) as it doesn't exist for PdfPTable
 
-            // Left Side: Business Info
+            // Left Side: Company
             PdfPCell leftCell = new PdfPCell();
-            leftCell.setBorder(Rectangle.NO_BORDER); // This removes the border for the cell
+            leftCell.setBorder(Rectangle.NO_BORDER);
             leftCell.addElement(new Paragraph("Your Company Name", boldFont));
             leftCell.addElement(new Paragraph("123 Business Street, Pune", normalFont));
             leftCell.addElement(new Paragraph("GSTIN: 27AAAAA0000A1Z5", normalFont));
             infoTable.addCell(leftCell);
 
-            // Right Side: Invoice Details
+            // Right Side: Invoice Info
             PdfPCell rightCell = new PdfPCell();
-            rightCell.setBorder(Rectangle.NO_BORDER); // This removes the border for the cell
+            rightCell.setBorder(Rectangle.NO_BORDER);
             Paragraph pNo = new Paragraph("Invoice No: " + invoice.getInvoiceNo(), normalFont);
             pNo.setAlignment(Element.ALIGN_RIGHT);
             rightCell.addElement(pNo);
@@ -66,23 +65,22 @@ public class PdfService {
             Paragraph pGroup = new Paragraph("Group: " + (invoice.getGroupName() != null ? invoice.getGroupName() : "N/A"), boldFont);
             pGroup.setAlignment(Element.ALIGN_RIGHT);
             rightCell.addElement(pGroup);
-
             infoTable.addCell(rightCell);
 
             document.add(infoTable);
             document.add(Chunk.NEWLINE);
 
-            // --- 4. CLIENT SECTION ---
+            // 3. Bill To
             document.add(new Paragraph("BILL TO:", boldFont));
-            document.add(new Paragraph(invoice.getEmailId() != null ? invoice.getEmailId() : "Valued Customer", normalFont));
+            document.add(new Paragraph(invoice.getEmailId() != null ? invoice.getEmailId() : "Customer", normalFont));
             document.add(Chunk.NEWLINE);
 
-            // --- 5. MAIN ITEMS TABLE ---
+            // 4. Main Table
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
             table.setWidths(new int[]{4, 1, 2, 2});
 
-            Stream.of("Service Description", "Qty", "Rate", "Total").forEach(columnTitle -> {
+            Stream.of("Description", "Qty", "Rate", "Total").forEach(columnTitle -> {
                 PdfPCell header = new PdfPCell();
                 header.setBackgroundColor(new BaseColor(63, 81, 181));
                 header.setPadding(8);
@@ -98,13 +96,13 @@ public class PdfService {
 
             document.add(table);
 
-            // --- 6. SUMMARY SECTION ---
+            // 5. Summary
             PdfPTable summaryTable = new PdfPTable(2);
             summaryTable.setWidthPercentage(40);
             summaryTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-            summaryTable.addCell(new Phrase("Subtotal:", normalFont));
-            summaryTable.addCell(new Phrase(String.valueOf(invoice.getAmountPayable()), normalFont));
+            summaryTable.addCell(new Phrase("Total Amount:", normalFont));
+            summaryTable.addCell(new Phrase("Rs. " + invoice.getAmountPayable(), normalFont));
 
             PdfPCell balanceCell = new PdfPCell(new Phrase("BALANCE DUE:", boldFont));
             balanceCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -115,13 +113,6 @@ public class PdfService {
             summaryTable.addCell(balanceVal);
 
             document.add(summaryTable);
-
-            // --- 7. FOOTER ---
-            document.add(Chunk.NEWLINE);
-            Paragraph footer = new Paragraph("Thank you for your business!", FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 10));
-            footer.setAlignment(Element.ALIGN_CENTER);
-            document.add(footer);
-
             document.close();
 
         } catch (DocumentException ex) {
