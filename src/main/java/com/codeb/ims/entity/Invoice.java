@@ -12,37 +12,34 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // --- IDENTIFIERS (The "Clear Management" columns you asked for) ---
-    private int invoiceNo;      // The final Invoice Number (e.g., 1001)
-    private Long estimatedId;   // Links back to the Estimate
-    private Long chainId;       // Links to the Client
+    private int invoiceNo;
+    private Long estimatedId;
+    private Long chainId;
 
-    // --- DETAILS ---
+    // --- ADDED FIELD ---
+    private String groupName;
+
     private String serviceDetails;
     private int quantity;
     private float costPerQty;
 
-    // --- FINANCIALS ---
-    private float amountPayable; // Total Amount
-    private float amountPaid;    // How much received so far
-    private float balance;       // Remaining (Total - Paid)
+    private float amountPayable;
+    private float amountPaid;
+    private float balance;
 
-    // --- NEW: PAYMENT LIFECYCLE FIELDS ---
-    private String status;        // "PENDING", "PAID", "PARTIAL"
-    private String paymentMode;   // "UPI", "NEFT", "CASH", "CHEQUE"
-    private String transactionId; // "UPI-123456" or Cheque No.
+    private String status;
+    private String paymentMode;
+    private String transactionId;
 
-    // --- DATES ---
     private LocalDate dateOfService;
-    private LocalDateTime dateOfPayment; // When was the LAST payment made?
+    private LocalDateTime dateOfPayment;
     private String deliveryDetails;
     private String emailId;
 
-    // --- AUTO STATUS SETTER ---
     @PrePersist
     protected void onCreate() {
         if (this.status == null) {
-            this.status = "PENDING"; // Default status
+            this.status = "PENDING";
         }
     }
 
@@ -58,6 +55,10 @@ public class Invoice {
 
     public Long getChainId() { return chainId; }
     public void setChainId(Long chainId) { this.chainId = chainId; }
+
+    // New Getter/Setter
+    public String getGroupName() { return groupName; }
+    public void setGroupName(String groupName) { this.groupName = groupName; }
 
     public String getServiceDetails() { return serviceDetails; }
     public void setServiceDetails(String serviceDetails) { this.serviceDetails = serviceDetails; }
@@ -98,6 +99,5 @@ public class Invoice {
     public String getEmailId() { return emailId; }
     public void setEmailId(String emailId) { this.emailId = emailId; }
 
-    // Helper for PdfService
     public float getTotalAmount() { return this.amountPayable; }
 }

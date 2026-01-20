@@ -1,36 +1,20 @@
 package com.codeb.ims.dto;
 
+import lombok.Data;
+
+@Data // Generates getters/setters automatically
 public class InvoiceRequest {
+    private Long estimatedId;
 
-    // The frontend sends "amount" (JSON), so we need this field
+    // --- ADDED FIELD ---
+    private String groupName;
+
+    private String serviceDetails;
+    private int quantity;
+    private float costPerQty;
+
+    // This matches the "amount" field sent by your frontend handleGenerate function
     private double amount;
-
-    // We can keep these just in case, or add more as needed
-    private String customerName;
-    private String email;
-
-    // --- GETTERS AND SETTERS ---
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    private float amountPaid;
+    private String emailId;
 }
