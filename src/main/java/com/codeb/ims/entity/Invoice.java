@@ -1,80 +1,103 @@
 package com.codeb.ims.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "invoices") // Matches the table name in your PDF
+@Table(name = "invoices")
 public class Invoice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // [cite: 192] "int(pk) and auto_increment"
+    private Long id;
 
-    @Column(unique = true, nullable = false)
-    private int invoiceNo; // [cite: 192] "Stores four digit unique id"
+    // --- IDENTIFIERS (The "Clear Management" columns you asked for) ---
+    private int invoiceNo;      // The final Invoice Number (e.g., 1001)
+    private Long estimatedId;   // Links back to the Estimate
+    private Long chainId;       // Links to the Client
 
-    private int estimatedId; // [cite: 192] "Stores estimated id"
-    private int chainId;     // [cite: 192] "Stores chain id"
+    // --- DETAILS ---
+    private String serviceDetails;
+    private int quantity;
+    private float costPerQty;
 
-    private String serviceDetails; // [cite: 192] "Stores details related to service"
-    private int quantity;          // [cite: 192] "Stores quantity"
-    private float costPerQty;      // [cite: 192] "Stores cost per quantity"
+    // --- FINANCIALS ---
+    private float amountPayable; // Total Amount
+    private float amountPaid;    // How much received so far
+    private float balance;       // Remaining (Total - Paid)
 
-    private float amountPayable;   // [cite: 192] "Total amount to be paid"
-    private float amountPaid;      // [cite: 192]
-    private float balance;         // [cite: 192] "Stored balance amount"
+    // --- NEW: PAYMENT LIFECYCLE FIELDS ---
+    private String status;        // "PENDING", "PAID", "PARTIAL"
+    private String paymentMode;   // "UPI", "NEFT", "CASH", "CHEQUE"
+    private String transactionId; // "UPI-123456" or Cheque No.
 
-    private LocalDateTime dateOfPayment; // [cite: 192] "datetime"
-    private LocalDate dateOfService;     // [cite: 192] "date"
+    // --- DATES ---
+    private LocalDate dateOfService;
+    private LocalDateTime dateOfPayment; // When was the LAST payment made?
+    private String deliveryDetails;
+    private String emailId;
 
-    private String deliveryDetails; // [cite: 192] "Address and other delivery details"
-    private String emailId;         // [cite: 192] "Stores email id"
+    // --- AUTO STATUS SETTER ---
+    @PrePersist
+    protected void onCreate() {
+        if (this.status == null) {
+            this.status = "PENDING"; // Default status
+        }
+    }
 
-    // Getters and Setters
+    // --- GETTERS AND SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public int getInvoiceNo() { return invoiceNo; }
     public void setInvoiceNo(int invoiceNo) { this.invoiceNo = invoiceNo; }
-    public int getEstimatedId() { return estimatedId; }
-    public void setEstimatedId(int estimatedId) { this.estimatedId = estimatedId; }
-    public int getChainId() { return chainId; }
-    public void setChainId(int chainId) { this.chainId = chainId; }
+
+    public Long getEstimatedId() { return estimatedId; }
+    public void setEstimatedId(Long estimatedId) { this.estimatedId = estimatedId; }
+
+    public Long getChainId() { return chainId; }
+    public void setChainId(Long chainId) { this.chainId = chainId; }
+
     public String getServiceDetails() { return serviceDetails; }
     public void setServiceDetails(String serviceDetails) { this.serviceDetails = serviceDetails; }
+
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
+
     public float getCostPerQty() { return costPerQty; }
     public void setCostPerQty(float costPerQty) { this.costPerQty = costPerQty; }
+
     public float getAmountPayable() { return amountPayable; }
     public void setAmountPayable(float amountPayable) { this.amountPayable = amountPayable; }
+
     public float getAmountPaid() { return amountPaid; }
     public void setAmountPaid(float amountPaid) { this.amountPaid = amountPaid; }
+
     public float getBalance() { return balance; }
     public void setBalance(float balance) { this.balance = balance; }
-    public LocalDateTime getDateOfPayment() { return dateOfPayment; }
-    public void setDateOfPayment(LocalDateTime dateOfPayment) { this.dateOfPayment = dateOfPayment; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getPaymentMode() { return paymentMode; }
+    public void setPaymentMode(String paymentMode) { this.paymentMode = paymentMode; }
+
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
+
     public LocalDate getDateOfService() { return dateOfService; }
     public void setDateOfService(LocalDate dateOfService) { this.dateOfService = dateOfService; }
+
+    public LocalDateTime getDateOfPayment() { return dateOfPayment; }
+    public void setDateOfPayment(LocalDateTime dateOfPayment) { this.dateOfPayment = dateOfPayment; }
+
     public String getDeliveryDetails() { return deliveryDetails; }
     public void setDeliveryDetails(String deliveryDetails) { this.deliveryDetails = deliveryDetails; }
+
     public String getEmailId() { return emailId; }
     public void setEmailId(String emailId) { this.emailId = emailId; }
 
-// --- HELPER METHODS FOR BACKWARD COMPATIBILITY ---
-
-    // Your PdfService looks for "totalAmount", so we bridge it to "amountPayable"
-    public float getTotalAmount() {
-        return this.amountPayable;
-    }
-
-    public void setTotalAmount(float totalAmount) {
-        this.amountPayable = totalAmount;
-    }
-
-
-
-
-
+    // Helper for PdfService
+    public float getTotalAmount() { return this.amountPayable; }
 }
