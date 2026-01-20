@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/estimates")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Critical for cross-domain communication
 public class EstimateController {
 
     @Autowired
@@ -19,11 +19,13 @@ public class EstimateController {
 
     @PostMapping
     public ResponseEntity<Estimate> createEstimate(@RequestBody EstimateRequest request) {
+        // Sends the request with Group Name to the Service for processing
         return ResponseEntity.ok(estimateService.createEstimate(request));
     }
 
     @GetMapping
     public ResponseEntity<List<Estimate>> getAllEstimates() {
+        // Returns the list containing the chain and group data
         return ResponseEntity.ok(estimateService.getAllEstimates());
     }
 

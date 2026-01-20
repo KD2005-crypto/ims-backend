@@ -10,11 +10,9 @@ public class EstimateRequest {
     private String brandName;
     private String zoneName;
     private String service;
-
     private int qty;
     private float costPerUnit;
-    private float gstRate; // Input: 18.0
-
+    private float gstRate;
     private LocalDate deliveryDate;
     private String deliveryDetails;
 }
