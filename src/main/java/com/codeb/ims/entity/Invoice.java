@@ -61,4 +61,20 @@ public class Invoice {
     public void setDeliveryDetails(String deliveryDetails) { this.deliveryDetails = deliveryDetails; }
     public String getEmailId() { return emailId; }
     public void setEmailId(String emailId) { this.emailId = emailId; }
+
+// --- HELPER METHODS FOR BACKWARD COMPATIBILITY ---
+
+    // Your PdfService looks for "totalAmount", so we bridge it to "amountPayable"
+    public float getTotalAmount() {
+        return this.amountPayable;
+    }
+
+    public void setTotalAmount(float totalAmount) {
+        this.amountPayable = totalAmount;
+    }
+
+
+
+
+
 }
