@@ -35,14 +35,18 @@ public class Invoice {
     private String deliveryDetails;
     private String emailId;
 
-    // --- NEW FIELD: MEMORY FOR ARCHIVE ---
+    // --- FIELD: Boolean Wrapper (Safely handles NULLs from old data) ---
     @Column(name = "is_archived")
-    private Boolean archived = false; // Changed to Wrapper Class
+    private Boolean archived = false;
 
     @PrePersist
     protected void onCreate() {
         if (this.status == null) {
             this.status = "PENDING";
+        }
+        // Safety: ensure new invoices are never null
+        if (this.archived == null) {
+            this.archived = false;
         }
     }
 
@@ -103,7 +107,16 @@ public class Invoice {
 
     public float getTotalAmount() { return this.amountPayable; }
 
-    // --- NEW GETTER/SETTER FOR ARCHIVE ---
-    public boolean isArchived() { return archived; }
-    public void setArchived(boolean archived) { this.archived = archived; }
+    // --- FIX: Safe Getters/Setters for Archive ---
+
+    // Changing return type to Boolean prevents crash if value is null
+    public Boolean isArchived() {
+        // Logic: If database has NULL, return FALSE (Active).
+        // This is the "Crash Guard" line:
+        return archived != null && archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
 }
