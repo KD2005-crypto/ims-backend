@@ -16,7 +16,6 @@ public class Invoice {
     private Long estimatedId;
     private Long chainId;
 
-    // --- ADDED FIELD ---
     private String groupName;
 
     private String serviceDetails;
@@ -35,6 +34,10 @@ public class Invoice {
     private LocalDateTime dateOfPayment;
     private String deliveryDetails;
     private String emailId;
+
+    // --- NEW FIELD: MEMORY FOR ARCHIVE ---
+    @Column(name = "is_archived")
+    private boolean archived = false; // Default is "Active" (not archived)
 
     @PrePersist
     protected void onCreate() {
@@ -56,7 +59,6 @@ public class Invoice {
     public Long getChainId() { return chainId; }
     public void setChainId(Long chainId) { this.chainId = chainId; }
 
-    // New Getter/Setter
     public String getGroupName() { return groupName; }
     public void setGroupName(String groupName) { this.groupName = groupName; }
 
@@ -100,4 +102,8 @@ public class Invoice {
     public void setEmailId(String emailId) { this.emailId = emailId; }
 
     public float getTotalAmount() { return this.amountPayable; }
+
+    // --- NEW GETTER/SETTER FOR ARCHIVE ---
+    public boolean isArchived() { return archived; }
+    public void setArchived(boolean archived) { this.archived = archived; }
 }

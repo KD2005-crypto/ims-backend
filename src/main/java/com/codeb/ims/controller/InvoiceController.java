@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/invoices")
-@CrossOrigin(origins = "*") // Allow Frontend access
+@CrossOrigin(origins = "*")
 public class InvoiceController {
 
     @Autowired
@@ -32,101 +32,90 @@ public class InvoiceController {
         return invoiceRepository.findAll();
     }
 
-    // --- 2. CREATE INVOICE (From Estimate) ---
+    // --- 2. CREATE INVOICE ---
     @PostMapping("/create")
     public ResponseEntity<Invoice> createInvoice(@RequestBody Map<String, Object> payload) {
         Invoice invoice = new Invoice();
-
-        // Map basic fields
         invoice.setServiceDetails((String) payload.get("serviceDetails"));
         invoice.setEmailId((String) payload.get("emailId"));
-
-        // Handle Numbers (Safely parse from JSON)
         invoice.setQuantity(Integer.parseInt(payload.get("quantity").toString()));
         invoice.setCostPerQty(Float.parseFloat(payload.get("costPerQty").toString()));
         invoice.setAmountPayable(Float.parseFloat(payload.get("amount").toString()));
 
-        // Initial Payment (if any)
         float initialPaid = Float.parseFloat(payload.get("amountPaid").toString());
         invoice.setAmountPaid(initialPaid);
         invoice.setBalance(invoice.getAmountPayable() - initialPaid);
 
-        // Map Linkage IDs (Crucial for tracking)
         if (payload.get("estimatedId") != null) {
             invoice.setEstimatedId(Long.parseLong(payload.get("estimatedId").toString()));
         }
 
-        // Auto-Generate Invoice Number (Simple logic: Count + 1000)
         long count = invoiceRepository.count();
         invoice.setInvoiceNo(1000 + (int) count + 1);
-
         invoice.setDateOfService(LocalDate.now());
 
-        // Set Status
-        if (invoice.getBalance() <= 0) {
-            invoice.setStatus("PAID");
-        } else {
-            invoice.setStatus("PENDING");
-        }
+        // Default Status
+        invoice.setStatus(invoice.getBalance() <= 0 ? "PAID" : "PENDING");
+        invoice.setArchived(false); // Ensure it's active by default
 
         return ResponseEntity.ok(invoiceRepository.save(invoice));
     }
 
-    // --- 3. CONFIRM PAYMENT (The New Feature!) ---
+    // --- 3. CONFIRM PAYMENT (Connects to Green Button) ---
     @PutMapping("/{id}/confirm-payment")
     public ResponseEntity<Invoice> confirmPayment(
             @PathVariable Long id,
-            @RequestParam String paymentMode,
-            @RequestParam String transactionId,
-            @RequestParam float amountPaid) {
+            @RequestBody Map<String, Object> paymentDetails) { // Changed to RequestBody for cleaner JSON
 
-        // Find Invoice
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invoice not found with ID: " + id));
 
-        // Update Payment Metadata
+        String paymentMode = (String) paymentDetails.get("paymentMode");
+        String transactionId = (String) paymentDetails.get("transactionId");
+
+        // Assuming verifying means full payment of remaining balance
+        float amountPaidNow = invoice.getBalance();
+
         invoice.setPaymentMode(paymentMode);
         invoice.setTransactionId(transactionId);
-
-        // Update Financials
-        float newTotalPaid = invoice.getAmountPaid() + amountPaid;
-        invoice.setAmountPaid(newTotalPaid);
-
-        float newBalance = invoice.getAmountPayable() - newTotalPaid;
-        // Prevent negative balance (just in case)
-        invoice.setBalance(Math.max(newBalance, 0));
-
-        // Update Status
-        if (invoice.getBalance() <= 0) {
-            invoice.setStatus("PAID");
-        } else {
-            invoice.setStatus("PARTIAL");
-        }
-
-        // Update Date
+        invoice.setAmountPaid(invoice.getAmountPaid() + amountPaidNow);
+        invoice.setBalance(0); // Fully Paid
+        invoice.setStatus("PAID");
         invoice.setDateOfPayment(LocalDateTime.now());
 
         return ResponseEntity.ok(invoiceRepository.save(invoice));
     }
 
-    // --- 4. DELETE INVOICE ---
+    // --- 4. ARCHIVE (Connects to Orange Button) ---
+    @PutMapping("/{id}/archive")
+    public ResponseEntity<Invoice> archiveInvoice(@PathVariable Long id) {
+        Invoice invoice = invoiceRepository.findById(id).orElseThrow();
+        invoice.setArchived(true);
+        return ResponseEntity.ok(invoiceRepository.save(invoice));
+    }
+
+    // --- 5. RESTORE (Connects to Restore Button) ---
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<Invoice> restoreInvoice(@PathVariable Long id) {
+        Invoice invoice = invoiceRepository.findById(id).orElseThrow();
+        invoice.setArchived(false);
+        return ResponseEntity.ok(invoiceRepository.save(invoice));
+    }
+
+    // --- 6. PERMANENT DELETE ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
         invoiceRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
-    // --- 5. GENERATE PDF ---
+    // --- 7. PDF ---
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) {
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
-
+        Invoice invoice = invoiceRepository.findById(id).orElseThrow();
         ByteArrayInputStream bis = pdfService.createInvoicePdf(invoice);
-
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "inline; filename=invoice_" + invoice.getInvoiceNo() + ".pdf");
-
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
