@@ -56,16 +56,17 @@ public class InvoiceController {
 
         // Default Status
         invoice.setStatus(invoice.getBalance() <= 0 ? "PAID" : "PENDING");
-        invoice.setArchived(false); // Ensure it's active by default
+
+        // REMOVED: invoice.setArchived(false) - This line was causing the crash
 
         return ResponseEntity.ok(invoiceRepository.save(invoice));
     }
 
-    // --- 3. CONFIRM PAYMENT (Connects to Green Button) ---
+    // --- 3. CONFIRM PAYMENT ---
     @PutMapping("/{id}/confirm-payment")
     public ResponseEntity<Invoice> confirmPayment(
             @PathVariable Long id,
-            @RequestBody Map<String, Object> paymentDetails) { // Changed to RequestBody for cleaner JSON
+            @RequestBody Map<String, Object> paymentDetails) {
 
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invoice not found with ID: " + id));
@@ -73,43 +74,28 @@ public class InvoiceController {
         String paymentMode = (String) paymentDetails.get("paymentMode");
         String transactionId = (String) paymentDetails.get("transactionId");
 
-        // Assuming verifying means full payment of remaining balance
         float amountPaidNow = invoice.getBalance();
 
         invoice.setPaymentMode(paymentMode);
         invoice.setTransactionId(transactionId);
         invoice.setAmountPaid(invoice.getAmountPaid() + amountPaidNow);
-        invoice.setBalance(0); // Fully Paid
+        invoice.setBalance(0);
         invoice.setStatus("PAID");
         invoice.setDateOfPayment(LocalDateTime.now());
 
         return ResponseEntity.ok(invoiceRepository.save(invoice));
     }
 
-    // --- 4. ARCHIVE (Connects to Orange Button) ---
-    @PutMapping("/{id}/archive")
-    public ResponseEntity<Invoice> archiveInvoice(@PathVariable Long id) {
-        Invoice invoice = invoiceRepository.findById(id).orElseThrow();
-        invoice.setArchived(true);
-        return ResponseEntity.ok(invoiceRepository.save(invoice));
-    }
+    // --- REMOVED: ARCHIVE & RESTORE ENDPOINTS (To fix 500 Error) ---
 
-    // --- 5. RESTORE (Connects to Restore Button) ---
-    @PutMapping("/{id}/restore")
-    public ResponseEntity<Invoice> restoreInvoice(@PathVariable Long id) {
-        Invoice invoice = invoiceRepository.findById(id).orElseThrow();
-        invoice.setArchived(false);
-        return ResponseEntity.ok(invoiceRepository.save(invoice));
-    }
-
-    // --- 6. PERMANENT DELETE ---
+    // --- 4. PERMANENT DELETE ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
         invoiceRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
-    // --- 7. PDF ---
+    // --- 5. PDF ---
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) {
         Invoice invoice = invoiceRepository.findById(id).orElseThrow();

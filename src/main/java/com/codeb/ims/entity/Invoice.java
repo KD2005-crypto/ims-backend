@@ -35,18 +35,12 @@ public class Invoice {
     private String deliveryDetails;
     private String emailId;
 
-    // --- 1. USE BOOLEAN WRAPPER (Allows NULL without crashing) ---
-    @Column(name = "is_archived")
-    private Boolean archived = false;
+    // --- ARCHIVED FIELD REMOVED TO FIX CRASH ---
 
     @PrePersist
     protected void onCreate() {
         if (this.status == null) {
             this.status = "PENDING";
-        }
-        // Safety: Ensure new invoices always have a value
-        if (this.archived == null) {
-            this.archived = false;
         }
     }
 
@@ -106,18 +100,4 @@ public class Invoice {
     public void setEmailId(String emailId) { this.emailId = emailId; }
 
     public float getTotalAmount() { return this.amountPayable; }
-
-    // --- 2. THE "SAFER GETTER" (Fixes the 500 Error) ---
-    public Boolean isArchived() {
-        // Logic: If the database value is NULL, we pretend it is FALSE.
-        // This prevents the backend from panicking on old records.
-        if (archived == null) {
-            return false;
-        }
-        return archived;
-    }
-
-    public void setArchived(Boolean archived) {
-        this.archived = archived;
-    }
 }
