@@ -37,7 +37,7 @@ public class Invoice {
 
     // --- NEW FIELD: MEMORY FOR ARCHIVE ---
     @Column(name = "is_archived")
-    private boolean archived = false; // Default is "Active" (not archived)
+    private Boolean archived = false; // Changed to Wrapper Class
 
     @PrePersist
     protected void onCreate() {
