@@ -1,4 +1,4 @@
-package com.codeb.ims.controller; // Keep it in controller package for simplicity
+package com.codeb.ims.controller;
 
 import com.codeb.ims.entity.Invoice;
 import com.codeb.ims.repository.InvoiceRepository;
@@ -17,20 +17,20 @@ public class DataFixer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println("--- 🛠️ STARTING DATABASE REPAIR ---");
 
-        // 1. Fetch ALL invoices (even broken ones)
         List<Invoice> allInvoices = invoiceRepository.findAll();
-
         int fixedCount = 0;
 
         for (Invoice inv : allInvoices) {
-            // Check if the new field is NULL
-            if (inv.isArchived() == null) {
-                inv.setArchived(false); // Set default to Active
+            // AGGRESSIVE FIX:
+            // Don't ask "is it null?". Just force it to FALSE (Active) if it's not TRUE.
+            // This ensures every single old invoice gets a valid value.
+            if (!Boolean.TRUE.equals(inv.isArchived())) {
+                inv.setArchived(false);
                 invoiceRepository.save(inv);
                 fixedCount++;
             }
         }
 
-        System.out.println("--- ✅ REPAIR COMPLETE: Fixed " + fixedCount + " invoices. ---");
+        System.out.println("--- ✅ REPAIR COMPLETE: Updated " + fixedCount + " invoices. ---");
     }
 }
