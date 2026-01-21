@@ -46,8 +46,8 @@ public class PdfService {
             // Left Side: Company
             PdfPCell leftCell = new PdfPCell();
             leftCell.setBorder(Rectangle.NO_BORDER);
-            leftCell.addElement(new Paragraph("Your Company Name", boldFont));
-            leftCell.addElement(new Paragraph("123 Business Street, Pune", normalFont));
+            leftCell.addElement(new Paragraph("Codeb Enterprises LTD", boldFont));
+            leftCell.addElement(new Paragraph("Codeb Office,Pune", normalFont));
             leftCell.addElement(new Paragraph("GSTIN: 27AAAAA0000A1Z5", normalFont));
             infoTable.addCell(leftCell);
 
