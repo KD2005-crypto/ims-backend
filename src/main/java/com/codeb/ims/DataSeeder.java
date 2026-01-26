@@ -28,18 +28,18 @@ public class DataSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
 
-        // 1. SEED ADMIN USER (✅ Fixed for new User Entity)
+        // 1. SEED ADMIN USER (✅ FIXED: Using setFullName)
         if (userRepository.count() == 0) {
             System.out.println("👤 Creating Admin User...");
             User admin = new User();
 
-            // Replaced .setName() with .setFullName() to match your PDF update
+            // This was the error! We changed it to setFullName:
             admin.setFullName("Admin User");
 
             admin.setEmail("admin@codeb.com");
             admin.setPassword("admin123");
             admin.setRole("ADMIN");
-            admin.setStatus("active"); // Ensure active status
+            admin.setStatus("active");
 
             userRepository.save(admin);
             System.out.println("✅ Default Admin Created: admin@codeb.com / admin123");
@@ -69,8 +69,6 @@ public class DataSeeder implements CommandLineRunner {
             createChart("growth", "Monthly Growth", "Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec", "50,40,300,320,500,350,200,230,500");
             createChart("tasks", "Active Locations", "Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec", "30,40,45,50,40,60,70,90,100");
         }
-
-        System.out.println("✅ All Data Seeding Completed!");
     }
 
     private void createProject(String name, String budget, int completion, String logo, List<Member> team) {
