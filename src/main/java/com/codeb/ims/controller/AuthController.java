@@ -11,23 +11,31 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "https://ims-frontend-psi.vercel.app") // Allow Frontend
+@CrossOrigin(origins = "*") // Changed to '*' to prevent any CORS issues during testing
 public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
 
-    // 1. REGISTER (Optional - useful for testing)
+    // 1. REGISTER
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
+        // Safety Check: Email
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email already exists");
         }
-        user.setRole("ADMIN"); // Default role
+
+        // --- ROLE LOGIC (The Fix) ---
+        // If the request doesn't specify a role, default to "STAFF" (Safe Mode)
+        // If the request sends "ADMIN", it will set as ADMIN.
+        if (user.getRole() == null || user.getRole().isEmpty()) {
+            user.setRole("STAFF");
+        }
+
         return ResponseEntity.ok(userRepository.save(user));
     }
 
-    // 2. LOGIN (The Main Feature)
+    // 2. LOGIN
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
         String email = loginData.get("email");
@@ -35,7 +43,10 @@ public class AuthController {
 
         Optional<User> user = userRepository.findByEmail(email);
 
+        // Simple Password Check
         if (user.isPresent() && user.get().getPassword().equals(password)) {
+            // This returns the FULL User object (including "role": "ADMIN" or "STAFF")
+            // The Frontend will read this 'role' to decide which buttons to hide.
             return ResponseEntity.ok(user.get());
         } else {
             return ResponseEntity.status(401).body("Invalid Credentials");
