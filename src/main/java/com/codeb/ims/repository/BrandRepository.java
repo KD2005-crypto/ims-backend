@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface BrandRepository extends JpaRepository<Brand, Long> {
 
-    // ✅ 1. USED BY BRAND SERVICE (Fixes the error in your screenshot)
+    // Existing method (Keep this!)
     List<Brand> findByIsActiveTrue();
 
-    // ✅ 2. USED FOR FILTERING CHAINS (Keep this!)
+    // Existing Filter (Keep this!)
     List<Brand> findByChain_ChainIdAndIsActiveTrue(Long chainId);
 
-    // ✅ 3. USED BY DASHBOARD SERVICE (Fixes the "0" or wrong count on Dashboard)
+    // ✅ ADD THIS LINE TO FIX THE RED ERROR
     long countByIsActiveTrue();
 }

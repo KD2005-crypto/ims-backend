@@ -20,18 +20,30 @@ public class DashboardService {
     public DashboardStats getStats() {
         DashboardStats stats = new DashboardStats();
 
-        // 1. Count Brands & Locations
-        // We cast (int) because .count() returns a long
-        stats.setTotalBrands((int) brandRepository.count());
-        stats.setTotalLocations((int) locationRepository.count());
+        // 1. COUNT ACTIVE BRANDS & LOCATIONS
+        try {
+            stats.setTotalBrands((int) brandRepository.countByIsActiveTrue());
+            stats.setTotalLocations((int) locationRepository.countByIsActiveTrue());
+        } catch (Exception e) {
+            stats.setTotalBrands(0);
+            stats.setTotalLocations(0);
+        }
 
-        // 2. Calculate Revenue & Invoices
+        // 2. FETCH ALL INVOICES
         List<Invoice> allInvoices = invoiceRepository.findAll();
-        stats.setTotalInvoices((long) allInvoices.size());
 
-        // 3. Sum up the Revenue
-        // FIXED: Removed the '!= null' check because float cannot be null
+        // 3. COUNT ACTIVE INVOICES
+        // FIX 1: Changed .getArchived() to .isArchived() (Standard Java convention)
+        long activeCount = allInvoices.stream()
+                .filter(i -> !Boolean.TRUE.equals(i.isArchived()))
+                .count();
+        stats.setTotalInvoices(activeCount);
+
+        // 4. SUM REVENUE
+        // FIX 2: Removed "!= null" check because 'float' cannot be null.
+        // We just grab the value directly.
         double revenue = allInvoices.stream()
+                .filter(i -> !Boolean.TRUE.equals(i.isArchived()))
                 .mapToDouble(Invoice::getAmountPayable)
                 .sum();
 

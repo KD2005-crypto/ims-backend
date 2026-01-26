@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface LocationRepository extends JpaRepository<Location, Long> {
 
-    // Keeps the Location List working
+    // Existing method (Keep this!)
     List<Location> findByIsActiveTrue();
 
-    // Keeps the Dashboard Count working
+    // ✅ ADD THIS LINE TO FIX THE RED ERROR
     long countByIsActiveTrue();
 }
