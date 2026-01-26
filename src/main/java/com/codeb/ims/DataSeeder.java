@@ -22,24 +22,30 @@ public class DataSeeder implements CommandLineRunner {
     @Autowired private ProjectRepository projectRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private ChartDataRepository chartRepository;
-    @Autowired private UserRepository userRepository; // <--- ADDED
+    @Autowired private UserRepository userRepository;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
 
-        // 1. SEED ADMIN USER
+        // 1. SEED ADMIN USER (✅ Fixed for new User Entity)
         if (userRepository.count() == 0) {
             System.out.println("👤 Creating Admin User...");
             User admin = new User();
-            admin.setName("Admin User");
+
+            // Replaced .setName() with .setFullName() to match your PDF update
+            admin.setFullName("Admin User");
+
             admin.setEmail("admin@codeb.com");
             admin.setPassword("admin123");
             admin.setRole("ADMIN");
+            admin.setStatus("active"); // Ensure active status
+
             userRepository.save(admin);
+            System.out.println("✅ Default Admin Created: admin@codeb.com / admin123");
         }
 
-        // 2. SEED PROJECTS
+        // 2. SEED PROJECTS (Untouched)
         if (projectRepository.count() == 0) {
             System.out.println("🌱 Seeding Project Data...");
             Member m1 = new Member(); m1.setName("Ryan Tompson"); m1.setAvatarPath("/team-1.jpg");
@@ -56,7 +62,7 @@ public class DataSeeder implements CommandLineRunner {
             createProject("Launch our Mobile App", "$20,500", 100, "/logo-spotify.svg", Arrays.asList(m4, m3, m1));
         }
 
-        // 3. SEED CHARTS
+        // 3. SEED CHARTS (Untouched)
         if (chartRepository.count() == 0) {
             System.out.println("📊 Seeding Chart Data...");
             createChart("sales", "Weekly Sales", "M,T,W,T,F,S,S", "50,20,10,22,50,10,40");
