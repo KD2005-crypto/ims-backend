@@ -21,17 +21,20 @@ public class DashboardService {
         DashboardStats stats = new DashboardStats();
 
         // 1. Count Brands & Locations
-        stats.setTotalBrands(brandRepository.count());
-        stats.setTotalLocations(locationRepository.count());
+        // We cast (int) because .count() returns a long
+        stats.setTotalBrands((int) brandRepository.count());
+        stats.setTotalLocations((int) locationRepository.count());
 
         // 2. Calculate Revenue & Invoices
         List<Invoice> allInvoices = invoiceRepository.findAll();
         stats.setTotalInvoices((long) allInvoices.size());
 
-        // Sum up the "Total Amount" of all invoices
+        // 3. Sum up the Revenue
+        // FIXED: Removed the '!= null' check because float cannot be null
         double revenue = allInvoices.stream()
-                .mapToDouble(Invoice::getTotalAmount)
+                .mapToDouble(Invoice::getAmountPayable)
                 .sum();
+
         stats.setTotalRevenue(revenue);
 
         return stats;
