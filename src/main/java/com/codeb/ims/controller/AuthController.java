@@ -52,4 +52,34 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid Credentials");
         }
     }
+
+    // 3. UPDATE PROFILE
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, String> updates) {
+        Optional<User> userOptional = userRepository.findById(id);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Update Name
+            if (updates.containsKey("fullName")) {
+                user.setFullName(updates.get("fullName"));
+            }
+
+            // Update Email
+            if (updates.containsKey("email")) {
+                user.setEmail(updates.get("email"));
+            }
+
+            // Update Password (Only if typed)
+            if (updates.containsKey("password") && !updates.get("password").isEmpty()) {
+                user.setPassword(updates.get("password"));
+            }
+
+            User updatedUser = userRepository.save(user);
+            return ResponseEntity.ok(updatedUser);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
