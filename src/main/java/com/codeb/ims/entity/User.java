@@ -1,16 +1,16 @@
 package com.codeb.ims.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor; // ✅ Added
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;  // ✅ Added (Critical for JPA)
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "app_users") // <--- CHANGED: Renamed table to force fresh creation
 @Data
-@NoArgsConstructor   // ✅ FIXES CRASH: Required by Hibernate/JPA
-@AllArgsConstructor  // ✅ HELPER: Useful for testing
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
