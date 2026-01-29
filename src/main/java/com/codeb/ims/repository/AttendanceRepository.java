@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
-    // Find the latest record for this user today
     Optional<Attendance> findByEmailAndDate(String email, LocalDate date);
-
-    // Get all history for this user
     List<Attendance> findAllByEmailOrderByDateDesc(String email);
+
+    // ✅ ADD THIS LINE (Find everyone present on a specific date)
+    List<Attendance> findAllByDate(LocalDate date);
 }

@@ -17,32 +17,31 @@ public class AttendanceService {
 
     public Attendance checkIn(String email) {
         LocalDate today = LocalDate.now();
-
-        // Prevent double check-in
         if (repository.findByEmailAndDate(email, today).isPresent()) {
             throw new RuntimeException("You have already checked in today!");
         }
-
         Attendance attendance = new Attendance();
         attendance.setEmail(email);
         attendance.setDate(today);
         attendance.setCheckInTime(LocalTime.now());
         attendance.setStatus("PRESENT");
-
         return repository.save(attendance);
     }
 
     public Attendance checkOut(String email) {
         LocalDate today = LocalDate.now();
-
         Attendance attendance = repository.findByEmailAndDate(email, today)
                 .orElseThrow(() -> new RuntimeException("You haven't checked in yet!"));
-
         attendance.setCheckOutTime(LocalTime.now());
         return repository.save(attendance);
     }
 
     public List<Attendance> getHistory(String email) {
         return repository.findAllByEmailOrderByDateDesc(email);
+    }
+
+    // ✅ ADD THIS METHOD (Get everyone for the Admin Dashboard)
+    public List<Attendance> getAllToday() {
+        return repository.findAllByDate(LocalDate.now());
     }
 }
