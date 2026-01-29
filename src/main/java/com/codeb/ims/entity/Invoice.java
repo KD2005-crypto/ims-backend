@@ -30,9 +30,12 @@ public class Invoice {
     private String deliveryDetails;
     private String emailId;
 
-    // --- RESTORED: Archive Field (With Safety Wrapper) ---
-    @Column(name = "is_archived")
+    // ✅ FIXED: We removed the @Column(name="is_archived") line.
+    // This allows Java to find the correct column name automatically.
     private Boolean archived = false;
+
+    // NOTE: I removed the "Client" code because that file does not exist in your project.
+    // Your dashboard works using the fields above (like chainId or groupName).
 
     @PrePersist
     protected void onCreate() {
@@ -79,9 +82,9 @@ public class Invoice {
     public void setEmailId(String emailId) { this.emailId = emailId; }
     public float getTotalAmount() { return this.amountPayable; }
 
-    // --- RESTORED: Safe Getter for Archive ---
+    // Safe Getter for Archive
     public Boolean isArchived() {
-        return archived != null && archived; // Safety check
+        return archived != null && archived;
     }
     public void setArchived(Boolean archived) { this.archived = archived; }
 }
