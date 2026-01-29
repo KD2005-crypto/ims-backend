@@ -2,8 +2,10 @@ package com.codeb.ims.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // ✅ Stops the crash, keeps the link
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,14 +20,18 @@ public class Chain {
     @Column(nullable = false)
     private String chainName;
 
-    private String gstNumber; // Required for Invoicing
+    private String gstNumber;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isActive = true;
 
-    // This links the Chain to a Group (Many Chains -> One Group)
+    // ✅ THE CRITICAL FIX
+    // We KEEP the link to ClientGroup (so your data stays connected).
+    // We only ignore the "chains" list INSIDE the group to stop the infinite echo.
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
+    @JsonIgnoreProperties({"chains", "chainList", "clientGroup"})
+    @ToString.Exclude // Prevents Lombok from crashing the logs
     private ClientGroup clientGroup;
 
     @CreationTimestamp
