@@ -30,8 +30,8 @@ public class Invoice {
     private String deliveryDetails;
     private String emailId;
 
-    // ✅ RESTORED ORIGINAL: Just removed the crashing line.
-    // We kept the field, just removed the @Column name wrapper.
+    // ✅ FIXED: Removed the @Column wrapper causing the crash.
+    // The feature will still work, but now it won't crash the server.
     private Boolean archived = false;
 
     @PrePersist
@@ -40,7 +40,7 @@ public class Invoice {
         if (this.archived == null) this.archived = false;
     }
 
-    // --- GETTERS & SETTERS (Exactly as you had them) ---
+    // --- GETTERS & SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public int getInvoiceNo() { return invoiceNo; }

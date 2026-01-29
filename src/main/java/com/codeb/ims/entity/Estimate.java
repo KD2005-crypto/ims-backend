@@ -3,6 +3,8 @@ package com.codeb.ims.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+// ✅ IMPORT NEEDED TO STOP CRASH
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "estimates")
@@ -12,9 +14,11 @@ public class Estimate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long estimatedId;
 
-    // Link to Chain (Company)
+    // ✅ FIXED: Added JsonIgnoreProperties to prevent Infinite Loop (500 Error)
+    // This tells the server: "Load the Chain, but don't load the Chain's estimate list again."
     @ManyToOne
     @JoinColumn(name = "chain_id", nullable = false)
+    @JsonIgnoreProperties({"estimates", "invoices"})
     private Chain chain;
 
     private String groupName;
