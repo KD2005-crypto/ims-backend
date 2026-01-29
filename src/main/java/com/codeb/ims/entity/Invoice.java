@@ -30,8 +30,8 @@ public class Invoice {
     private String deliveryDetails;
     private String emailId;
 
-    // ✅ FIXED: Removed the @Column wrapper causing the crash.
-    // The feature will still work, but now it won't crash the server.
+    // ✅ FIXED: REMOVED @Column(name="is_archived").
+    // The field 'archived' stays, but we let the database find the name automatically.
     private Boolean archived = false;
 
     @PrePersist
