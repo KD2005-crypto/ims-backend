@@ -30,12 +30,9 @@ public class Invoice {
     private String deliveryDetails;
     private String emailId;
 
-    // ✅ FIXED: We removed the @Column(name="is_archived") line.
-    // This allows Java to find the correct column name automatically.
+    // ✅ RESTORED ORIGINAL: Just removed the crashing line.
+    // We kept the field, just removed the @Column name wrapper.
     private Boolean archived = false;
-
-    // NOTE: I removed the "Client" code because that file does not exist in your project.
-    // Your dashboard works using the fields above (like chainId or groupName).
 
     @PrePersist
     protected void onCreate() {
@@ -43,7 +40,7 @@ public class Invoice {
         if (this.archived == null) this.archived = false;
     }
 
-    // --- GETTERS & SETTERS ---
+    // --- GETTERS & SETTERS (Exactly as you had them) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public int getInvoiceNo() { return invoiceNo; }
