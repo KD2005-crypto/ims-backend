@@ -3,7 +3,7 @@ package com.codeb.ims.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-// ✅ THIS IMPORT IS REQUIRED TO STOP THE CRASH
+// ✅ CRITICAL IMPORT TO STOP THE CRASH
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -15,10 +15,10 @@ public class Estimate {
     private Long estimatedId;
 
     // ✅ FIXED: Added @JsonIgnoreProperties
-    // This stops the "Infinite Loop" (Chain -> Estimate -> Chain...)
+    // This stops the "Infinite Loop" that is causing the 500 Error right now.
     @ManyToOne
     @JoinColumn(name = "chain_id", nullable = false)
-    @JsonIgnoreProperties({"estimates", "invoices"})
+    @JsonIgnoreProperties({"estimates", "invoices", "brand", "clientGroup"})
     private Chain chain;
 
     private String groupName;
