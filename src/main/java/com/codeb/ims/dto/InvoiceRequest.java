@@ -6,8 +6,10 @@ import lombok.Data;
 public class InvoiceRequest {
     private Long estimatedId;
 
-    // --- ADDED FIELD ---
+    // --- ENHANCED FIELDS ---
     private String groupName;
+    private String clientName; // ✅ Added to capture Client from Frontend
+    private String zoneName;   // ✅ Added to capture Location/Zone from Frontend
 
     private String serviceDetails;
     private int quantity;

@@ -2,7 +2,9 @@ package com.codeb.ims.service;
 
 import com.codeb.ims.dto.InvoiceRequest;
 import com.codeb.ims.entity.Invoice;
+import com.codeb.ims.entity.Estimate; // ✅ FIXED: Changed from SalesEstimate to Estimate
 import com.codeb.ims.repository.InvoiceRepository;
+import com.codeb.ims.repository.EstimateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -16,6 +18,9 @@ public class InvoiceService {
     @Autowired
     private InvoiceRepository invoiceRepository;
 
+    @Autowired
+    private EstimateRepository estimateRepository;
+
     public Invoice createInvoice(InvoiceRequest request) {
         Invoice invoice = new Invoice();
 
@@ -23,23 +28,40 @@ public class InvoiceService {
         int random4Digit = 1000 + new Random().nextInt(9000);
         invoice.setInvoiceNo(random4Digit);
 
-        // 2. Map standard fields from Request
-        invoice.setEstimatedId(request.getEstimatedId());
+        // 2. FETCH ESTIMATE DATA (The Bridge)
+        // This looks up the original Estimate to get Client and Zone details
+        if (request.getEstimatedId() != null) {
+            estimateRepository.findById(request.getEstimatedId()).ifPresent((Estimate estimate) -> {
+                // ✅ Copy the "Rich" data from Estimate to Invoice
+                invoice.setEstimatedId(estimate.getEstimatedId());
 
-        // --- CRITICAL FIX: Mapping the new fields ---
-        invoice.setGroupName(request.getGroupName());
+                // Fetch Client Name from the Chain relationship if it exists
+                if (estimate.getChain() != null) {
+                    invoice.setClientName(estimate.getChain().getChainName());
+                    invoice.setChainId(estimate.getChain().getChainId());
+                } else {
+                    invoice.setClientName("Walk-in Client");
+                }
+
+                invoice.setBrandName(estimate.getBrandName());
+                invoice.setZoneName(estimate.getZoneName());
+                invoice.setGroupName(estimate.getGroupName());
+            });
+        }
+
+        // 3. Map standard fields from Request
         invoice.setServiceDetails(request.getServiceDetails());
         invoice.setQuantity(request.getQuantity());
         invoice.setCostPerQty(request.getCostPerQty());
         invoice.setEmailId(request.getEmailId());
 
-        // 3. Financial Mapping
+        // 4. Financial Mapping
         float amount = (float) request.getAmount();
         invoice.setAmountPayable(amount);
         invoice.setAmountPaid(request.getAmountPaid());
         invoice.setBalance(amount - request.getAmountPaid());
 
-        // 4. Status Logic
+        // 5. Status Logic
         if (invoice.getBalance() <= 0) {
             invoice.setStatus("PAID");
         } else if (invoice.getAmountPaid() > 0) {
@@ -50,6 +72,7 @@ public class InvoiceService {
 
         invoice.setDateOfPayment(LocalDateTime.now());
         invoice.setDateOfService(LocalDate.now());
+        invoice.setArchived(false);
 
         return invoiceRepository.save(invoice);
     }

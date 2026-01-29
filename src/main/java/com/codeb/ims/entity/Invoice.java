@@ -15,6 +15,12 @@ public class Invoice {
     private int invoiceNo;
     private Long estimatedId;
     private Long chainId;
+
+    // Bridge fields
+    private String clientName;
+    private String brandName;
+    private String zoneName;
+
     private String groupName;
     private String serviceDetails;
     private int quantity;
@@ -30,7 +36,6 @@ public class Invoice {
     private String deliveryDetails;
     private String emailId;
 
-    // --- RESTORED: Archive Field (With Safety Wrapper) ---
     @Column(name = "is_archived")
     private Boolean archived = false;
 
@@ -49,6 +54,14 @@ public class Invoice {
     public void setEstimatedId(Long estimatedId) { this.estimatedId = estimatedId; }
     public Long getChainId() { return chainId; }
     public void setChainId(Long chainId) { this.chainId = chainId; }
+
+    public String getClientName() { return clientName; }
+    public void setClientName(String clientName) { this.clientName = clientName; }
+    public String getBrandName() { return brandName; }
+    public void setBrandName(String brandName) { this.brandName = brandName; }
+    public String getZoneName() { return zoneName; }
+    public void setZoneName(String zoneName) { this.zoneName = zoneName; }
+
     public String getGroupName() { return groupName; }
     public void setGroupName(String groupName) { this.groupName = groupName; }
     public String getServiceDetails() { return serviceDetails; }
@@ -59,8 +72,11 @@ public class Invoice {
     public void setCostPerQty(float costPerQty) { this.costPerQty = costPerQty; }
     public float getAmountPayable() { return amountPayable; }
     public void setAmountPayable(float amountPayable) { this.amountPayable = amountPayable; }
+
+    // ✅ FIXED: Renamed back to standard setAmountPaid
     public float getAmountPaid() { return amountPaid; }
     public void setAmountPaid(float amountPaid) { this.amountPaid = amountPaid; }
+
     public float getBalance() { return balance; }
     public void setBalance(float balance) { this.balance = balance; }
     public String getStatus() { return status; }
@@ -79,9 +95,6 @@ public class Invoice {
     public void setEmailId(String emailId) { this.emailId = emailId; }
     public float getTotalAmount() { return this.amountPayable; }
 
-    // --- RESTORED: Safe Getter for Archive ---
-    public Boolean isArchived() {
-        return archived != null && archived; // Safety check
-    }
+    public Boolean isArchived() { return archived != null && archived; }
     public void setArchived(Boolean archived) { this.archived = archived; }
 }
