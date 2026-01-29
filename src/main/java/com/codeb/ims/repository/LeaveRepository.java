@@ -6,4 +6,7 @@ import java.util.List;
 
 public interface LeaveRepository extends JpaRepository<LeaveRequest, Long> {
     List<LeaveRequest> findByStatus(String status);
+
+    // ✅ ADD THIS: Search leaves by user email
+    List<LeaveRequest> findByEmail(String email);
 }

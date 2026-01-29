@@ -31,7 +31,6 @@ public class LeaveController {
     }
 
     // ✅ 3. ADMIN PORTAL: Handle Approve/Reject buttons
-    // Matches the frontend call: /api/leaves/{id}/status?status=approve
     @PutMapping("/{id}/status")
     public ResponseEntity<LeaveRequest> updateStatus(
             @PathVariable Long id,
@@ -40,7 +39,6 @@ public class LeaveController {
         LeaveRequest request = leaveRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
 
-        // Convert 'approve' to 'APPROVED' or 'reject' to 'REJECTED'
         if (status.equalsIgnoreCase("approve")) {
             request.setStatus("APPROVED");
         } else if (status.equalsIgnoreCase("reject")) {
@@ -48,5 +46,23 @@ public class LeaveController {
         }
 
         return ResponseEntity.ok(leaveRepository.save(request));
+    }
+
+    // ✅ NEW 4. USER PORTAL: Get all history for a specific user (Persistent Log)
+    // This prevents requests from "vanishing" after they are approved/rejected
+    @GetMapping("/user/{email}")
+    public List<LeaveRequest> getUserLeaves(@PathVariable String email) {
+        return leaveRepository.findByEmail(email);
+    }
+
+    // ✅ NEW 5. USER PORTAL: Delete a record to clear the inbox mess
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteLeave(@PathVariable Long id) {
+        try {
+            leaveRepository.deleteById(id);
+            return ResponseEntity.ok("Deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Could not delete record");
+        }
     }
 }
