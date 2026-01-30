@@ -25,13 +25,14 @@ public class AuthController {
     @Value("${codeb.brevo.sender}")
     private String senderEmail;
 
-    // --- 1. REGISTER ---
+    // --- 1. REGISTER (Public - Creates STAFF by default) ---
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
             if (userRepository.findByEmail(user.getEmail()).isPresent()) {
                 return ResponseEntity.badRequest().body("Error: Email already exists");
             }
+            // Default role is always STAFF for public registration
             if (user.getRole() == null || user.getRole().isEmpty()) {
                 user.setRole("STAFF");
             }
@@ -60,7 +61,7 @@ public class AuthController {
         }
     }
 
-    // --- 3. FORGOT PASSWORD (THE FIX) ---
+    // --- 3. FORGOT PASSWORD ---
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -68,7 +69,6 @@ public class AuthController {
 
         if (userOptional.isPresent()) {
             try {
-                // 1. Prepare the Reset Link
                 // Ensure this matches your Vercel URL
                 String resetLink = "https://ims-frontend-psi.vercel.app/authentication/reset-password?email=" + email;
 
@@ -80,9 +80,7 @@ public class AuthController {
                         "<p>If you did not request this, ignore this email.</p>" +
                         "</body></html>";
 
-                // 2. Prepare JSON Body for Brevo API
                 Map<String, Object> body = new HashMap<>();
-
                 Map<String, String> sender = new HashMap<>();
                 sender.put("name", "Code-B IMS");
                 sender.put("email", senderEmail);
@@ -97,7 +95,6 @@ public class AuthController {
                 body.put("subject", "Reset Your Password");
                 body.put("htmlContent", htmlContent);
 
-                // 3. Send Request via RestTemplate (Port 443)
                 String apiUrl = "https://api.brevo.com/v3/smtp/email";
                 HttpHeaders headers = new HttpHeaders();
                 headers.set("api-key", brevoApiKey);
@@ -106,7 +103,6 @@ public class AuthController {
                 HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
                 RestTemplate restTemplate = new RestTemplate();
 
-                // Fire the request
                 ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
 
                 if (response.getStatusCode() == HttpStatus.CREATED || response.getStatusCode() == HttpStatus.OK) {
@@ -157,5 +153,25 @@ public class AuthController {
             return ResponseEntity.ok(userRepository.save(user));
         }
         return ResponseEntity.notFound().build();
+    }
+
+    // --- 6. CREATE NEW ADMIN (Protected Endpoint) ---
+    // ✅ This allows an existing Admin to create another Admin via Settings
+    @PostMapping("/create-admin")
+    public ResponseEntity<?> createAdmin(@RequestBody User user) {
+        try {
+            // Check if email exists
+            if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest().body("Error: Email already exists");
+            }
+
+            // FORCE Role to ADMIN
+            user.setRole("ADMIN");
+            user.setStatus("active");
+
+            return ResponseEntity.ok(userRepository.save(user));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
     }
 }
